@@ -1,0 +1,95 @@
+import os
+import win32api
+import win32print
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QFileDialog, QComboBox, QHBoxLayout, QVBoxLayout, QLabel
+
+class PrintFolderApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.title = 'Hot Folder by binesheb'
+        self.folder_path = None
+        self.print_option = None
+        self.file_list = []
+        self.initUI()
+    
+    def initUI(self):
+        # Set the window title
+        self.setWindowTitle(self.title)
+        
+        # Create a button to select the folder to monitor
+        select_folder_button = QPushButton('Select Folder', self)
+        select_folder_button.clicked.connect(self.select_folder)
+        
+        # Create a label to display the selected folder
+        self.folder_label = QLabel('', self)
+        
+        # Create a combo box to select single or double-sided printing
+        self.print_option_combo = QComboBox(self)
+        self.print_option_combo.addItem('Single-Sided')
+        self.print_option_combo.addItem('Double-Sided')
+        self.print_option_combo.setEnabled(False)
+        self.print_option_combo.currentIndexChanged.connect(self.select_print_option)
+        
+        # Create a button to start monitoring the folder
+        start_button = QPushButton('Start', self)
+        start_button.setEnabled(False)
+        start_button.clicked.connect(self.start_monitoring)
+        
+        # Create a horizontal layout for the folder selection widgets
+        folder_layout = QHBoxLayout()
+        folder_layout.addWidget(select_folder_button)
+        folder_layout.addWidget(self.folder_label)
+        
+        # Create a horizontal layout for the printing option widgets
+        print_option_layout = QHBoxLayout()
+        print_option_layout.addWidget(QLabel('Print Option:', self))
+        print_option_layout.addWidget(self.print_option_combo)
+        
+        # Create a vertical layout for all the widgets
+        main_layout = QVBoxLayout()
+        main_layout.addLayout(folder_layout)
+        main_layout.addLayout(print_option_layout)
+        main_layout.addWidget(start_button)
+        
+        # Set the main layout for the window
+        self.setLayout(main_layout)
+        
+        # Show the window
+        self.show()
+    
+    def select_folder(self):
+        # Open a file dialog to select the folder to monitor
+        options = QFileDialog.Options()
+        options |= QFileDialog.ShowDirsOnly
+        self.folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', options=options)
+        
+        # Update the folder label and enable the print option combo box
+        if self.folder_path:
+            self.folder_label.setText(self.folder_path)
+            self.print_option_combo.setEnabled(True)
+    
+    def select_print_option(self, index):
+        # Set the print option based on the selected index of the combo box
+        if index == 0:
+            self.print_option = '/P /DDUPLEX=1'
+        elif index == 1:
+            self.print_option = '/P /DDUPLEX=2'
+    
+    def start_monitoring(self):
+        # Get the initial list of files in the folder
+        self.file_list = os.listdir(self.folder_path)
+        
+        # Monitor the folder for changes
+        while True:
+            # Get the updated list of files in the folder
+            updated_file_list = os.listdir(self.folder_path)
+        
+            # Check if any new files have been added to the folder
+            new_files = [f for f in updated_file_list if f not in self.file_list]
+        
+            # Print the new files
+            for new_file in new_files:
+                file_path = os.path.join(self.folder_path, new_file)
+            
+                # Print the file with the selected print option
+                win32api.ShellExecute(0, "print", file_path, self.print_option, ".", 
