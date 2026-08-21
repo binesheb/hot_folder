@@ -1,0 +1,4 @@
+# Runtime dependencies for the experimental Windows prototype.
+# Keep dependencies on maintained release lines; avoid deprecated/unmaintained packages.
+PyQt5>=5.15,<6
+pywin32>=306
