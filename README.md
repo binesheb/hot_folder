@@ -14,39 +14,45 @@ This repository contains a 2023 PyQt5 prototype. It is not yet release-ready: th
 
 ## Running the prototype
 
-The source currently lives in `source_code` and should be treated as experimental. A future cleanup should rename it to a normal Python entry point and add a dependency manifest.
+The source currently lives in `source_code` and should be treated as experimental. A dependency manifest is provided so the prototype can be installed reproducibly without relying on undeclared packages:
 
-Typical dependencies are:
-
-```text
-PyQt5
-pywin32
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
-Because the current monitoring loop runs on the UI thread and the checked-in file is incomplete, do not rely on this prototype for unattended printing yet.
+The current monitoring loop runs on the UI thread and the checked-in file is incomplete, so do not rely on this prototype for unattended printing yet.
 
 ## Updates
 
 ### Automatic updates
 
-Automatic self-updating is **not enabled** yet. A future packaged Windows release should check GitHub Releases for a newer signed/versioned build, show the release notes, and require user confirmation before installing.
+Automatic self-updating is **not enabled** yet. If a future packaged Windows release adds an update checker, its automatic update source must be the repository's GitHub **`main` branch only**. It must not pull from feature/development branches, must validate the candidate build before replacement, and should require user confirmation before installing because printer automation can affect physical output.
 
 ### Manual update
 
-For a Git checkout:
+For a Git checkout, update only from `origin/main`:
 
 ```bash
-git fetch --tags --prune
-git pull --ff-only
+git switch main
+git fetch origin main --prune
+git pull --ff-only origin main
+python -m pip install -r requirements.txt
 ```
 
 To stay on a known revision:
 
 ```bash
-git checkout <tag-or-commit>
+git checkout <commit>
 ```
 
-To roll back, check out a previously known-good tag or commit.
+To roll back, check out a previously known-good commit.
+
+## Dependency policy
+
+`requirements.txt` is the source of truth for the prototype's Python dependencies. Dependencies should remain on maintained release lines; deprecated or unmaintained packages must be replaced with compatible supported alternatives and validated before release.
 
 ## Versioning and releases
 
@@ -63,5 +69,5 @@ See `CHANGELOG.md` for release notes.
 1. Finish and validate the monitoring loop without blocking the GUI.
 2. Wait for files to become stable before printing.
 3. Add printer selection, status reporting, and retry/error handling.
-4. Add `requirements.txt` or `pyproject.toml` and a Windows packaging workflow.
+4. Rename `source_code` to a normal Python entry point and add a Windows packaging workflow.
 5. Add tests for file detection and print-job state handling before enabling an update checker.
