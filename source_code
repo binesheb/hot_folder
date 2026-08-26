@@ -92,4 +92,6 @@ class PrintFolderApp(QWidget):
                 file_path = os.path.join(self.folder_path, new_file)
             
                 # Print the file with the selected print option
-                win32api.ShellExecute(0, "print", file_path, self.print_option, ".", 
+                win32api.ShellExecute(0, "print", file_path, self.print_option, ".", 0)
+
+            self.file_list = updated_file_list
