@@ -1,6 +1,7 @@
 import os
 import win32api
 import win32print
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QFileDialog, QComboBox, QHBoxLayout, QVBoxLayout, QLabel
 
 class PrintFolderApp(QWidget):
@@ -10,6 +11,8 @@ class PrintFolderApp(QWidget):
         self.folder_path = None
         self.print_option = None
         self.file_list = []
+        self.monitor_timer = QTimer(self)
+        self.monitor_timer.timeout.connect(self.check_for_new_files)
         self.initUI()
     
     def initUI(self):
@@ -31,9 +34,9 @@ class PrintFolderApp(QWidget):
         self.print_option_combo.currentIndexChanged.connect(self.select_print_option)
         
         # Create a button to start monitoring the folder
-        start_button = QPushButton('Start', self)
-        start_button.setEnabled(False)
-        start_button.clicked.connect(self.start_monitoring)
+        self.start_button = QPushButton('Start', self)
+        self.start_button.setEnabled(False)
+        self.start_button.clicked.connect(self.start_monitoring)
         
         # Create a horizontal layout for the folder selection widgets
         folder_layout = QHBoxLayout()
@@ -49,7 +52,7 @@ class PrintFolderApp(QWidget):
         main_layout = QVBoxLayout()
         main_layout.addLayout(folder_layout)
         main_layout.addLayout(print_option_layout)
-        main_layout.addWidget(start_button)
+        main_layout.addWidget(self.start_button)
         
         # Set the main layout for the window
         self.setLayout(main_layout)
@@ -67,6 +70,7 @@ class PrintFolderApp(QWidget):
         if self.folder_path:
             self.folder_label.setText(self.folder_path)
             self.print_option_combo.setEnabled(True)
+            self.start_button.setEnabled(True)
     
     def select_print_option(self, index):
         # Set the print option based on the selected index of the combo box
@@ -78,20 +82,26 @@ class PrintFolderApp(QWidget):
     def start_monitoring(self):
         # Get the initial list of files in the folder
         self.file_list = os.listdir(self.folder_path)
+        self.monitor_timer.start(500)
+        self.start_button.setEnabled(False)
         
-        # Monitor the folder for changes
-        while True:
-            # Get the updated list of files in the folder
-            updated_file_list = os.listdir(self.folder_path)
-        
-            # Check if any new files have been added to the folder
-            new_files = [f for f in updated_file_list if f not in self.file_list]
-        
-            # Print the new files
-            for new_file in new_files:
-                file_path = os.path.join(self.folder_path, new_file)
-            
-                # Print the file with the selected print option
-                win32api.ShellExecute(0, "print", file_path, self.print_option, ".", 0)
+    def check_for_new_files(self):
+        if not self.folder_path or not os.path.isdir(self.folder_path):
+            self.monitor_timer.stop()
+            self.start_button.setEnabled(bool(self.folder_path))
+            return
 
-            self.file_list = updated_file_list
+        # Get the updated list of files in the folder
+        updated_file_list = os.listdir(self.folder_path)
+        
+        # Check if any new files have been added to the folder
+        new_files = [f for f in updated_file_list if f not in self.file_list]
+        
+        # Print the new files
+        for new_file in new_files:
+            file_path = os.path.join(self.folder_path, new_file)
+            
+            # Print the file with the selected print option
+            win32api.ShellExecute(0, "print", file_path, self.print_option, ".", 0)
+
+        self.file_list = updated_file_list
