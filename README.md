@@ -4,7 +4,7 @@ A small Windows desktop utility concept for automatically printing files that ap
 
 ## Current status
 
-This repository contains a 2023 PyQt5 prototype. It is not yet release-ready: the current implementation needs a non-blocking folder watcher, safe handling for partially copied files, printer selection/error reporting, and packaging before unattended use.
+This repository contains a 2023 PyQt5 prototype. It is not yet release-ready: the current implementation still needs safe handling for partially copied files, printer selection/error reporting, and packaging before unattended use. The folder polling now runs from a Qt timer rather than a blocking UI loop, but the checked-in prototype remains experimental.
 
 ## Architecture
 
@@ -23,7 +23,7 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-The current monitoring loop runs on the UI thread and the checked-in file is incomplete, so do not rely on this prototype for unattended printing yet.
+The current monitoring loop uses a Qt timer, so it does not intentionally block the PyQt5 UI while polling. The checked-in printing workflow is still incomplete, so do not rely on this prototype for unattended printing yet.
 
 ## Updates
 
@@ -66,8 +66,7 @@ See `CHANGELOG.md` for release notes.
 
 ## Next steps
 
-1. Finish and validate the monitoring loop without blocking the GUI.
-2. Wait for files to become stable before printing.
-3. Add printer selection, status reporting, and retry/error handling.
-4. Rename `source_code` to a normal Python entry point and add a Windows packaging workflow.
-5. Add tests for file detection and print-job state handling before enabling an update checker.
+1. Wait for files to become stable before printing.
+2. Add printer selection, status reporting, and retry/error handling.
+3. Rename `source_code` to a normal Python entry point and add a Windows packaging workflow.
+4. Add tests for file detection and print-job state handling before enabling an update checker.
