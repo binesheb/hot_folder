@@ -9,7 +9,7 @@ class PrintFolderApp(QWidget):
         super().__init__()
         self.title = 'Hot Folder by binesheb'
         self.folder_path = None
-        self.print_option = None
+        self.print_option = '/P /DDUPLEX=1'
         self.file_list = []
         self.monitor_timer = QTimer(self)
         self.monitor_timer.timeout.connect(self.check_for_new_files)
