@@ -97,9 +97,11 @@ class PrintFolderApp(QWidget):
         # Check if any new files have been added to the folder
         new_files = [f for f in updated_file_list if f not in self.file_list]
         
-        # Print the new files
+        # Print only newly added regular files; ignore directories created in the hot folder.
         for new_file in new_files:
             file_path = os.path.join(self.folder_path, new_file)
+            if not os.path.isfile(file_path):
+                continue
             
             # Print the file with the selected print option
             win32api.ShellExecute(0, "print", file_path, self.print_option, ".", 0)
