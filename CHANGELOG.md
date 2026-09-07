@@ -8,6 +8,7 @@ The project intends to follow [Semantic Versioning](https://semver.org/) once ru
 
 ### Fixed
 
+- Ignore directories detected in the hot folder instead of attempting to send them to the registered print handler.
 - Moved folder polling onto a Qt timer so the prototype no longer blocks the PyQt5 UI thread while monitoring.
 
 ## [0.1.1] - 2026-08-20
