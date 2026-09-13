@@ -135,9 +135,8 @@ class PrintFolderApp(QWidget):
                 else:
                     self.status_label.setText(f'Status: Sent to printer ({new_file})')
             except OSError:
-                # A file that is still being copied or temporarily unavailable is retried
-                # on the next polling interval instead of being sent prematurely.
-                self.pending_files.pop(file_path, None)
+                # A file that is still being copied or temporarily unavailable remains pending
+                # so it can be checked again on the next polling interval.
                 continue
 
         self.file_list = updated_file_list
