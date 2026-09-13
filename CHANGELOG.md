@@ -8,6 +8,8 @@ The project intends to follow [Semantic Versioning](https://semver.org/) once ru
 
 ### Fixed
 
+- Wait for new files to keep the same size and modification time for one polling interval before sending them to the registered printer, reducing the risk of printing partially copied files.
+- Keep temporarily unavailable pending files queued for another polling interval instead of losing them after a transient filesystem error.
 - Ignore directories detected in the hot folder instead of attempting to send them to the registered print handler.
 - Moved folder polling onto a Qt timer so the prototype no longer blocks the PyQt5 UI thread while monitoring.
 
