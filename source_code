@@ -105,10 +105,15 @@ class PrintFolderApp(QWidget):
         
         # Check if any new files have been added to the folder
         new_files = [f for f in updated_file_list if f not in self.file_list]
-        
-        # Print only newly added regular files; ignore directories created in the hot folder.
         for new_file in new_files:
             file_path = os.path.join(self.folder_path, new_file)
+            if os.path.isfile(file_path):
+                self.pending_files.setdefault(file_path, None)
+        
+        # Re-check pending files on every polling interval so a file can become stable
+        # even after it has entered self.file_list.
+        for file_path in list(self.pending_files):
+            new_file = os.path.basename(file_path)
             if not os.path.isfile(file_path):
                 self.pending_files.pop(file_path, None)
                 continue
@@ -117,8 +122,8 @@ class PrintFolderApp(QWidget):
                 # Wait for the file's size and modification time to remain unchanged
                 # for one polling interval before handing it to the registered printer.
                 signature = (os.path.getsize(file_path), os.stat(file_path).st_mtime_ns)
-                previous_signature = self.pending_files.get(file_path)
-                if previous_signature != signature:
+                previous_signature = self.pending_files[file_path]
+                if previous_signature is None or previous_signature != signature:
                     self.pending_files[file_path] = signature
                     continue
                 self.pending_files.pop(file_path, None)
