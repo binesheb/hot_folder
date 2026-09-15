@@ -87,7 +87,12 @@ class PrintFolderApp(QWidget):
     
     def start_monitoring(self):
         # Get the initial list of files in the folder
-        self.file_list = os.listdir(self.folder_path)
+        try:
+            self.file_list = os.listdir(self.folder_path)
+        except OSError:
+            self.file_list = []
+            self.status_label.setText('Status: Folder unavailable')
+            return
         self.pending_files.clear()
         self.monitor_timer.start(500)
         self.start_button.setEnabled(False)
@@ -101,7 +106,11 @@ class PrintFolderApp(QWidget):
             return
 
         # Get the updated list of files in the folder
-        updated_file_list = os.listdir(self.folder_path)
+        try:
+            updated_file_list = os.listdir(self.folder_path)
+        except OSError:
+            self.status_label.setText('Status: Folder temporarily unavailable')
+            return
         
         # Check if any new files have been added to the folder
         new_files = [f for f in updated_file_list if f not in self.file_list]
