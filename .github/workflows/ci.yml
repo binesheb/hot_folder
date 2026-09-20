@@ -23,3 +23,5 @@ jobs:
         run: python -m pip check
       - name: Compile prototype
         run: python -m py_compile source_code
+      - name: Verify runtime imports
+        run: python -c "import runpy; runpy.run_path('source_code', run_name='__ci__')"
