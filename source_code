@@ -22,8 +22,8 @@ class PrintFolderApp(QWidget):
         self.setWindowTitle(self.title)
         
         # Create a button to select the folder to monitor
-        select_folder_button = QPushButton('Select Folder', self)
-        select_folder_button.clicked.connect(self.select_folder)
+        self.select_folder_button = QPushButton('Select Folder', self)
+        self.select_folder_button.clicked.connect(self.select_folder)
         
         # Create a label to display the selected folder
         self.folder_label = QLabel('', self)
@@ -40,12 +40,17 @@ class PrintFolderApp(QWidget):
         self.start_button.setEnabled(False)
         self.start_button.clicked.connect(self.start_monitoring)
 
+        # Allow monitoring to be stopped without closing the application.
+        self.stop_button = QPushButton('Stop', self)
+        self.stop_button.setEnabled(False)
+        self.stop_button.clicked.connect(self.stop_monitoring)
+
         # Show the most recent monitoring/printing status without interrupting the hot-folder loop.
         self.status_label = QLabel('Status: Ready', self)
         
         # Create a horizontal layout for the folder selection widgets
         folder_layout = QHBoxLayout()
-        folder_layout.addWidget(select_folder_button)
+        folder_layout.addWidget(self.select_folder_button)
         folder_layout.addWidget(self.folder_label)
         
         # Create a horizontal layout for the printing option widgets
@@ -53,11 +58,16 @@ class PrintFolderApp(QWidget):
         print_option_layout.addWidget(QLabel('Print Option:', self))
         print_option_layout.addWidget(self.print_option_combo)
         
+        # Set up the monitoring controls
+        monitor_layout = QHBoxLayout()
+        monitor_layout.addWidget(self.start_button)
+        monitor_layout.addWidget(self.stop_button)
+        
         # Create a vertical layout for all the widgets
         main_layout = QVBoxLayout()
         main_layout.addLayout(folder_layout)
         main_layout.addLayout(print_option_layout)
-        main_layout.addWidget(self.start_button)
+        main_layout.addLayout(monitor_layout)
         main_layout.addWidget(self.status_label)
         
         # Set the main layout for the widgets
@@ -85,6 +95,14 @@ class PrintFolderApp(QWidget):
             self.print_option = '/P /DDUPLEX=1'
         elif index == 1:
             self.print_option = '/P /DDUPLEX=2'
+
+    def stop_monitoring(self):
+        self.monitor_timer.stop()
+        self.pending_files.clear()
+        self.stop_button.setEnabled(False)
+        self.select_folder_button.setEnabled(True)
+        self.start_button.setEnabled(bool(self.folder_path))
+        self.status_label.setText('Status: Monitoring stopped')
     
     def start_monitoring(self):
         # Get the initial list of files in the folder
@@ -97,12 +115,16 @@ class PrintFolderApp(QWidget):
         self.pending_files.clear()
         self.monitor_timer.start(500)
         self.start_button.setEnabled(False)
+        self.stop_button.setEnabled(True)
+        self.select_folder_button.setEnabled(False)
         self.status_label.setText('Status: Monitoring')
         
     def check_for_new_files(self):
         if not self.folder_path or not os.path.isdir(self.folder_path):
             self.monitor_timer.stop()
             self.start_button.setEnabled(bool(self.folder_path))
+            self.stop_button.setEnabled(False)
+            self.select_folder_button.setEnabled(True)
             self.status_label.setText('Status: Folder unavailable')
             return
 
