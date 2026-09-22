@@ -6,6 +6,10 @@ The project intends to follow [Semantic Versioning](https://semver.org/) once ru
 
 ## [Unreleased]
 
+### Added
+
+- Added a Stop control so monitoring can be halted without closing the application; folder selection is disabled while monitoring is active to avoid switching watched folders mid-run.
+
 ### Fixed
 
 - Wait for new files to keep the same size and modification time for one polling interval before sending them to the registered printer, reducing the risk of printing partially copied files.
