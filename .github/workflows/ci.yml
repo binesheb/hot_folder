@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2 # v5
+      - uses: actions/setup-python@ec52d0af729a7c50ced4261d17a07916f43f5b8e # v5
         with:
           python-version: '3.11'
       - name: Install dependencies
