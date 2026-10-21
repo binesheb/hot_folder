@@ -1,72 +1,88 @@
 # Hot Folder
 
-A small Windows desktop utility concept for automatically printing files that appear in a selected folder.
+**Windows hot-folder printing for rule-based document output.**
 
-## Current status
+Hot Folder watches a configured root directory and its subfolders. When a supported document arrives in a rule folder such as `A4_Simplex`, `A4_Duplex`, or `A5-Duplex`, the app waits until the file is stable and submits it to the configured Windows printer with the folder's paper-size and duplex rules.
 
-This repository contains a 2023 PyQt5 prototype. It is not yet release-ready: the current implementation still needs safe handling for partially copied files, printer selection/error reporting, and packaging before unattended use. The folder polling now runs from a Qt timer rather than a blocking UI loop, but the checked-in prototype remains experimental.
+Repository: https://github.com/binesheb/hot_folder
 
-## Architecture
+## Project status
 
-- **PyQt5** provides the desktop interface.
-- **Windows Shell printing** is used to hand a new file to its registered application/printer.
-- The selected folder is intended to be watched for newly added files.
+The project is in active development. The initial delivery target is a **Windows desktop EXE**. The design separates folder monitoring, print rules, job state, and printer execution so a later Windows Service and a separate service-control application can reuse the core engine.
 
-## Running the prototype
+**Do not use unattended production printing until the acceptance checklist in [TESTING.md](TESTING.md) passes on the target printer.** The GitHub source is not itself a signed, tested release binary.
 
-The source currently lives in `source_code` and should be treated as experimental. A dependency manifest is provided so the prototype can be installed reproducibly without relying on undeclared packages:
+## Initial scope
+
+- Select one root folder; monitor configured rule subfolders recursively.
+- Recognize names such as `A4_Simplex`, `A4_Duplex`, `A5-Duplex` (case-insensitive; underscore and hyphen accepted).
+- Configure a designated Windows printer.
+- Start/stop monitoring and show job status in a desktop window.
+- Wait for copied files to stop changing before submitting them.
+- Avoid duplicate submission during one app run; log outcomes and errors.
+- Initial print adapter targets PDF files using SumatraPDF's command-line interface. Other formats require a tested adapter; they are not silently sent through an unpredictable file association.
+- Package as a Windows EXE using PyInstaller.
+
+## Folder convention
+
+```text
+D:\\PrintQueue\\
+  A4_Simplex\\
+    invoice-001.pdf
+  A4_Duplex\\
+    report-002.pdf
+  A5-Duplex\\
+    label-003.pdf
+```
+
+Rule syntax: `<PAPER>_<SIDEDNESS>` or `<PAPER>-<SIDEDNESS>`. Initial paper sizes: A4, A5. Initial sidedness: Simplex, Duplex. For duplex, printer driver defaults determine edge binding unless a supported explicit setting is added. Unknown folders are ignored.
+
+## Development setup (Windows)
+
+1. Install Python 3.11 or 3.12 (64-bit) and a working Windows printer driver.
+2. Install SumatraPDF and note the full path to `SumatraPDF.exe`.
+3. Clone the repository and open PowerShell in its root.
+4. Create a virtual environment and install dependencies:
+
+   ```powershell
+   py -3.12 -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   python -m pip install --upgrade pip
+   python -m pip install -r requirements.txt
+   ```
+
+5. Run the desktop app: `python main.py`.
+6. Configure the root, printer, and SumatraPDF executable in the app. Use a test printer or harmless test pages first.
+
+## Build the EXE
+
+Run on Windows, not Linux/macOS:
 
 ```powershell
-py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+.\build.ps1
 ```
 
-The current monitoring loop uses a Qt timer, so it does not intentionally block the PyQt5 UI while polling. The checked-in printing workflow is still incomplete, so do not rely on this prototype for unattended printing yet.
+The output is placed under `dist\\HotFolder\\` (one-folder distribution). The build script deliberately starts with a folder distribution because it is easier to diagnose missing printer/PDF dependencies. A single-file EXE can be considered after acceptance testing.
 
-## Updates
+## Documentation
 
-### Automatic updates
+- [PRD.md](PRD.md) — requirements and acceptance criteria
+- [ARCHITECTURE.md](ARCHITECTURE.md) — desktop-to-service migration boundary
+- [TESTING.md](TESTING.md) — automated and manual checks
+- [ROADMAP.md](ROADMAP.md) — delivery stages
+- [config.example.json](config.example.json) — example settings
+- [CHANGELOG.md](CHANGELOG.md) — change history
+- [UPDATE.md](UPDATE.md) — update and rollback notes
 
-Automatic self-updating is **not enabled** yet. If a future packaged Windows release adds an update checker, its automatic update source must be the repository's GitHub **`main` branch only**. It must not pull from feature/development branches, must validate the candidate build before replacement, and should require user confirmation before installing because printer automation can affect physical output.
+## Configuration and operations
 
-### Manual update
+Configuration is stored in `%LOCALAPPDATA%\\HotFolder\\config.json`; logs are written to `%LOCALAPPDATA%\\HotFolder\\hotfolder.log`. The app starts stopped and never deletes source files.
 
-For a Git checkout, update only from `origin/main`:
+A successful renderer command means **submitted to the Windows print pipeline**, not proof that paper physically came out. Printer names and paper/duplex behavior vary by driver, so verify the actual output on every target printer. Network shares require appropriate access for the interactive user and, later, the Windows service identity.
 
-```bash
-git switch main
-git fetch origin main --prune
-git pull --ff-only origin main
-python -m pip install -r requirements.txt
-```
+Automatic updates are not enabled. Release updates must be reviewed, versioned, and sourced from `main`/tagged releases only.
 
-To stay on a known revision:
+## License
 
-```bash
-git checkout <commit>
-```
-
-To roll back, check out a previously known-good commit.
-
-## Dependency policy
-
-`requirements.txt` is the source of truth for the prototype's Python dependencies. Dependencies should remain on maintained release lines; deprecated or unmaintained packages must be replaced with compatible supported alternatives and validated before release.
-
-## Versioning and releases
-
-The project follows Semantic Versioning once runnable releases exist:
-
-- **MAJOR** — incompatible workflow or architecture changes.
-- **MINOR** — backwards-compatible features.
-- **PATCH** — bug fixes, safety fixes, and documentation/maintenance changes.
-
-See `CHANGELOG.md` for release notes.
-
-## Next steps
-
-1. Wait for files to become stable before printing.
-2. Add printer selection, status reporting, and retry/error handling.
-3. Rename `source_code` to a normal Python entry point and add a Windows packaging workflow.
-4. Add tests for file detection and print-job state handling before enabling an update checker.
+No license has been declared yet. Do not assume the code is open-source licensed until a LICENSE file is added.
