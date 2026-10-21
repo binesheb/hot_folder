@@ -29,7 +29,7 @@ Use a harmless test PDF and a test printer or print queue that is safe to exerci
 13. Configure an invalid renderer/printer; verify a clear error without crashing.
 14. Stop monitoring while files are pending; verify no new submission after stop.
 15. Restart app and observe duplicate behavior. Until a persistent ledger is implemented, restart-safe exactly-once behavior is not guaranteed.
-12. Test a network share using the actual user identity intended for deployment.
+16. Test a network share using the actual user identity intended for deployment.
 
 ## Build check (Windows)
 
