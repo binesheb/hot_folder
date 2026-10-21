@@ -57,6 +57,8 @@ Parsing is case-insensitive and accepts underscore or hyphen between paper and s
 - **FR-10 Error handling:** A missing root, inaccessible file, missing renderer, unknown rule, or printer error must not crash monitoring.
 - **FR-11 Packaging:** Build a Windows EXE distribution and document installation.
 - **FR-12 Service readiness:** Keep business logic separate from UI; later service must support install/start/stop/status and a separate control UI.
+- **FR-13 Completed archive:** Move only successfully submitted files into the root-level `Completed/` folder while preserving relative paths. Never scan that archive as an input queue.
+- **FR-14 Archive safety:** Never overwrite an existing archived file; use a numbered collision name. If the move fails, keep the source and log the archive error.
 
 ## 7. Non-functional requirements
 
