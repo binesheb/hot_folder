@@ -8,7 +8,7 @@ Run on any development machine:
 python -m unittest discover -s tests -v
 ```
 
-The unit tests cover folder-name parsing and nearest-rule resolution without needing a printer.
+The unit tests cover folder-name parsing, nearest-rule resolution, and Completed archive path/move behavior without needing a printer.
 
 ## Windows manual tests
 
@@ -21,10 +21,14 @@ Use a harmless test PDF and a test printer or print queue that is safe to exerci
 5. Copy a large PDF slowly; ensure no partial document is submitted.
 6. Copy a TXT/PNG/DOCX file; verify it is skipped and logged in the PDF-only MVP.
 7. Put a PDF in an unrecognized folder; verify it is not printed.
-8. Temporarily disconnect/rename the root; verify a visible error and recovery after restoration.
-9. Configure an invalid renderer/printer; verify a clear error without crashing.
-10. Stop monitoring while files are pending; verify no new submission after stop.
-11. Restart app and observe duplicate behavior. Until a persistent ledger is implemented, restart-safe exactly-once behavior is not guaranteed.
+8. After a successful submission, verify the PDF moves to `Completed/<original relative path>` and the original input path is empty.
+9. Verify the `Completed` folder is not scanned or reprinted.
+10. Pre-create an archived file with the same name; verify the existing archive is not overwritten and the new file gets a numbered name.
+11. Force an archive move failure (e.g., permissions); verify the original remains and an archive error is logged.
+12. Temporarily disconnect/rename the root; verify a visible error and recovery after restoration.
+13. Configure an invalid renderer/printer; verify a clear error without crashing.
+14. Stop monitoring while files are pending; verify no new submission after stop.
+15. Restart app and observe duplicate behavior. Until a persistent ledger is implemented, restart-safe exactly-once behavior is not guaranteed.
 12. Test a network share using the actual user identity intended for deployment.
 
 ## Build check (Windows)
