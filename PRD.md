@@ -63,7 +63,7 @@ Parsing is case-insensitive and accepts underscore or hyphen between paper and s
 ## 7. Non-functional requirements
 
 - UI remains responsive during monitoring and print submission.
-- No source file deletion or mutation.
+- No source file deletion; successful submissions are moved to the Completed archive, and failed jobs are left in place.
 - Conservative retry policy; never automatically retry an ambiguous submission without duplicate-risk handling.
 - Configuration is local and recoverable; logs rotate or have a documented retention policy before production.
 - App starts in a safe stopped state unless an explicit, tested auto-start setting is enabled.
@@ -84,8 +84,9 @@ Configuration should include root folder, polling interval, stability duration, 
 6. Repeated polling does not create repeated jobs during the same run.
 7. Missing root/renderer/printer errors are visible and monitoring can recover.
 8. Stop halts new submissions without corrupting the UI.
-9. Automated rule tests pass; packaging can be built on Windows.
-10. Target printer tests verify real output before a production release.
+9. Automated rule and archive tests pass; packaging can be built on Windows.
+10. Successfully submitted files move to `Completed/` with their folder structure preserved; failed jobs stay in place and archived files are not reprinted.
+11. Target printer tests verify real output before a production release.
 
 ## 10. Risks and decisions
 
