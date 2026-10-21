@@ -36,7 +36,7 @@ class CompletedArchiveTests(unittest.TestCase):
         source = root / "A4_Simplex" / "branch" / "invoice.pdf"
         self.assertEqual(
             completed_destination(source, root),
-            root / "Completed" / "A4_Simplex" / "branch" / "invoice.pdf",
+            root.resolve() / "Completed" / "A4_Simplex" / "branch" / "invoice.pdf",
         )
 
     def test_archive_does_not_requeue_completed_files(self):
