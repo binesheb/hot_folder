@@ -1,0 +1,13 @@
+{
+  "root_folder": "C:\\PrintQueue",
+  "poll_interval_ms": 1000,
+  "stable_seconds": 3,
+  "printer_name": "",
+  "sumatra_pdf_path": "C:\\Program Files\\SumatraPDF\\SumatraPDF.exe",
+  "supported_extensions": [".pdf"],
+  "rules": {
+    "A4_Simplex": {"paper": "A4", "sides": "simplex"},
+    "A4_Duplex": {"paper": "A4", "sides": "duplex"},
+    "A5-Duplex": {"paper": "A5", "sides": "duplex"}
+  }
+}
