@@ -3,6 +3,8 @@
 Notable changes are documented here. Dates use ISO 8601.
 
 ## Unreleased
+- Archive successfully submitted PDFs under the watched root's `Completed/` folder while preserving the original relative directory structure.
+- Exclude the archive from input scanning and avoid overwriting archived files on name collisions.
 
 - Defined the Windows EXE-first product direction and later Windows Service/control-app architecture.
 - Added product requirements, architecture, roadmap, testing checklist, and example configuration.
