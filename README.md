@@ -20,6 +20,8 @@ The project is in active development. The initial delivery target is a **Windows
 - Start/stop monitoring and show job status in a desktop window.
 - Wait for copied files to stop changing before submitting them.
 - Avoid duplicate submission during one app run; log outcomes and errors.
+- After a successful renderer submission, move the source file to `Completed/`, preserving its rule-folder and nested folder structure. Failed jobs remain in the input folder.
+- Never scan the `Completed/` archive as input. Existing archive files are not overwritten; collisions receive a numbered filename.
 - Initial print adapter targets PDF files using SumatraPDF's command-line interface. Other formats require a tested adapter; they are not silently sent through an unpredictable file association.
 - Package as a Windows EXE using PyInstaller.
 
