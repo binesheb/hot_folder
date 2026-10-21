@@ -67,6 +67,39 @@ def find_rule_for_path(file_path: Path, root: Path) -> Optional[PrintRule]:
     return None
 
 
+def completed_destination(file_path: Path, root: Path, folder_name: str = "Completed") -> Optional[Path]:
+    """Return the archive path while preserving the watched folder's relative structure."""
+    try:
+        source = file_path.resolve()
+        root_resolved = root.resolve()
+        relative = source.relative_to(root_resolved)
+    except (OSError, ValueError):
+        return None
+    if not relative.parts or relative.parts[0].casefold() == folder_name.casefold():
+        return None
+    return root_resolved / folder_name / relative
+
+
+def move_to_completed(file_path: Path, root: Path, folder_name: str = "Completed") -> tuple[bool, str]:
+    """Move a successfully submitted job to Completed without overwriting an archived file."""
+    destination = completed_destination(file_path, root, folder_name)
+    if destination is None:
+        return False, "Source is outside the watched root or already in the archive."
+    try:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        final_path = destination
+        if final_path.exists():
+            stem, suffix = destination.stem, destination.suffix
+            counter = 1
+            while final_path.exists():
+                final_path = destination.with_name(f"{stem} ({counter}){suffix}")
+                counter += 1
+        shutil.move(str(file_path), str(final_path))
+        return True, f"Moved to {final_path}"
+    except OSError as exc:
+        return False, f"Print was submitted, but moving to Completed failed: {exc}"
+
+
 def default_config_dir() -> Path:
     base = os.environ.get("LOCALAPPDATA")
     if base:
@@ -200,6 +233,7 @@ class HotFolderWindow(QMainWindow):
             "printer_name": "",
             "sumatra_pdf_path": r"C:\Program Files\SumatraPDF\SumatraPDF.exe",
             "supported_extensions": [".pdf"],
+            "completed_folder_name": "Completed",
         }
         try:
             if self.config_path.is_file():
@@ -263,6 +297,7 @@ class HotFolderWindow(QMainWindow):
             "poll_interval_ms": max(500, int(self.config.get("poll_interval_ms", 1000))),
             "stable_seconds": max(2, int(self.config.get("stable_seconds", 3))),
             "supported_extensions": [".pdf"],
+            "completed_folder_name": str(self.config.get("completed_folder_name", "Completed")).strip() or "Completed",
         })
         try:
             self.config_dir.mkdir(parents=True, exist_ok=True)
@@ -314,6 +349,11 @@ class HotFolderWindow(QMainWindow):
         try:
             for folder, dirs, filenames in os.walk(root):
                 dirs[:] = [d for d in dirs if not d.startswith(".")]
+                # Completed is an archive, never an input queue. Exclude only the
+                # configured archive directly under the watched root.
+                if Path(folder).resolve() == root.resolve():
+                    archive_name = str(self.config.get("completed_folder_name", "Completed")).casefold()
+                    dirs[:] = [d for d in dirs if d.casefold() != archive_name]
                 for filename in filenames:
                     path = Path(folder) / filename
                     active_paths.add(str(path))
@@ -360,6 +400,15 @@ class HotFolderWindow(QMainWindow):
         self.seen.add(key)
         label = "SUBMITTED" if ok else "FAILED"
         self.append_log(f"{label}: {path.name} | {rule.paper} {rule.sides} | {printer} | {message}")
+        if ok:
+            archive_name = str(self.config.get("completed_folder_name", "Completed")).strip() or "Completed"
+            moved, move_message = move_to_completed(path, Path(self.config["root_folder"]), archive_name)
+            if moved:
+                self.append_log(f"ARCHIVED: {move_message}")
+                label = "COMPLETED"
+            else:
+                self.append_log(f"ARCHIVE ERROR: {move_message}")
+                label = "SUBMITTED — ARCHIVE ERROR"
         self.status.setText(f"Status: {label} — {path.name}")
 
     def closeEvent(self, event) -> None:
