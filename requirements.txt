@@ -1,4 +1,4 @@
-# Runtime dependencies for the experimental Windows prototype.
-# Keep dependencies on maintained release lines; avoid deprecated/unmaintained packages.
-PyQt5>=5.15,<6
-pywin32>=306
+# Windows desktop UI and printer enumeration
+PyQt5>=5.15.10,<6
+pywin32>=306; platform_system == "Windows"
+pyinstaller>=6.10

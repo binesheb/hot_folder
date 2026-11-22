@@ -1,27 +1,17 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+Notable changes are documented here. Dates use ISO 8601.
 
-The project intends to follow [Semantic Versioning](https://semver.org/) once runnable releases are established.
+## Unreleased
+- Archive successfully submitted PDFs under the watched root's `Completed/` folder while preserving the original relative directory structure.
+- Exclude the archive from input scanning and avoid overwriting archived files on name collisions.
 
-## [Unreleased]
+- Defined the Windows EXE-first product direction and later Windows Service/control-app architecture.
+- Added product requirements, architecture, roadmap, testing checklist, and example configuration.
+- Added a desktop MVP with rule parsing, recursive polling, a stable-file gate, Windows printer enumeration, and PDF submission via SumatraPDF.
+- Added initial unit tests and a Windows PyInstaller build script.
+- Documented that command submission does not confirm physical print completion and that persistent restart-safe job tracking remains future work.
 
-### Added
+## 0.1.0 — Prototype baseline
 
-- Added a Stop control so monitoring can be halted without closing the application; folder selection is disabled while monitoring is active to avoid switching watched folders mid-run.
-
-### Fixed
-
-- Wait for new files to keep the same size and modification time for one polling interval before sending them to the registered printer, reducing the risk of printing partially copied files.
-- Keep temporarily unavailable pending files queued for another polling interval instead of losing them after a transient filesystem error.
-- Ignore directories detected in the hot folder instead of attempting to send them to the registered print handler.
-- Moved folder polling onto a Qt timer so the prototype no longer blocks the PyQt5 UI thread while monitoring.
-
-## [0.1.1] - 2026-08-20
-
-### Changed
-
-- Documented the prototype architecture and current implementation limitations.
-- Added safe manual update, revision pinning, and rollback guidance.
-- Defined the future opt-in automatic update model using versioned GitHub Releases.
-- Recorded packaging, reliability, and test prerequisites before unattended printing or automatic updates.
+- Initial PyQt5 hot-folder concept with basic polling and shell-print handoff.

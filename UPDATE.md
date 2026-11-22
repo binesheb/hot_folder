@@ -1,16 +1,21 @@
 # Updating Hot Folder
 
-## Manual update
+## Source checkout
 
-1. Pull the latest main commit.
-2. Create a clean Python virtual environment using the supported Python version documented by the project.
-3. Install requirements.txt.
-4. Run the available tests or smoke checks before deployment.
+Back up the user's configuration first. From the repository directory:
 
-## Dependency maintenance
+```powershell
+git switch main
+git fetch origin main --prune
+git pull --ff-only origin main
+python -m pip install -r requirements.txt
+python -m unittest discover -s tests -v
+```
 
-Dependabot checks Python and GitHub Actions dependencies weekly. Review updates through CI before merging.
+Review release notes before using a new build. Do not run feature branches as a production updater source.
 
-## Automatic updates
+## Packaged application
 
-The application does not silently replace itself. Updates are applied manually so deployments remain auditable and reversible.
+The current build is a development distribution, not a signed enterprise installer. Stop monitoring, back up the configuration under `%LOCALAPPDATA%\\HotFolder\\config.json`, replace the application folder with a verified release, then relaunch and verify the printer and renderer settings. Never update while a print submission is in progress.
+
+Automatic self-updating is not implemented.

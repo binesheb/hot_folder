@@ -1,0 +1,9 @@
+{
+  "root_folder": "C:\\PrintQueue",
+  "poll_interval_ms": 1000,
+  "stable_seconds": 3,
+  "printer_name": "",
+  "sumatra_pdf_path": "C:\\Program Files\\SumatraPDF\\SumatraPDF.exe",
+  "supported_extensions": [".pdf"],
+  "completed_folder_name": "Completed"
+}
