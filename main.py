@@ -68,16 +68,27 @@ def find_rule_for_path(file_path: Path, root: Path) -> Optional[PrintRule]:
 
 
 def completed_destination(file_path: Path, root: Path, folder_name: str = "Completed") -> Optional[Path]:
-    """Return the archive path while preserving the watched folder's relative structure."""
+    """Return a safe in-root archive path while preserving the watched folder structure."""
+    archive_name = str(folder_name).strip()
+    if (
+        not archive_name
+        or archive_name in {".", ".."}
+        or "/" in archive_name
+        or "\\" in archive_name
+        or ":" in archive_name
+    ):
+        return None
     try:
         source = file_path.resolve()
         root_resolved = root.resolve()
         relative = source.relative_to(root_resolved)
-    except (OSError, ValueError):
+        if not relative.parts or relative.parts[0].casefold() == archive_name.casefold():
+            return None
+        destination = (root_resolved / archive_name / relative).resolve()
+        destination.relative_to(root_resolved)
+    except (OSError, ValueError, RuntimeError):
         return None
-    if not relative.parts or relative.parts[0].casefold() == folder_name.casefold():
-        return None
-    return root_resolved / folder_name / relative
+    return destination
 
 
 def move_to_completed(file_path: Path, root: Path, folder_name: str = "Completed") -> tuple[bool, str]:
