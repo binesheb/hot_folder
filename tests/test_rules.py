@@ -49,6 +49,14 @@ class CompletedArchiveTests(unittest.TestCase):
             completed_destination(Path("/tmp/outside/invoice.pdf"), Path("/tmp/printqueue"))
         )
 
+    def test_archive_folder_name_cannot_escape_watched_root(self):
+        root = Path("/tmp/printqueue")
+        source = root / "A4_Simplex" / "invoice.pdf"
+        invalid_names = ("", ".", "..", "../outside", "nested/escape", r"nested\\escape", r"C:\\outside")
+        for name in invalid_names:
+            with self.subTest(name=name):
+                self.assertIsNone(completed_destination(source, root, name))
+
     def test_move_to_completed_moves_file_and_preserves_content(self):
         import tempfile
         with tempfile.TemporaryDirectory() as temp_dir:
